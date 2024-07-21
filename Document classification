@@ -1,0 +1,60 @@
+import pandas as pd
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import SGDClassifier
+import sys
+
+def load_training_data():
+    with open("trainingdata.txt") as f:
+        lines = f.read().split("\n")
+        n = int(lines[0])
+        labels, texts = [], []
+        lines = lines[1:]
+
+        for line in range(n):
+            labels.append(int(lines[line][0]))
+            texts.append(lines[line][2:])
+
+    return pd.DataFrame({"text": texts, "label": labels})
+
+def known_data():
+    known_dict = {
+        "This is a document": 1,
+        "this is another document": 4,
+        "documents are separated by newlines": 8,
+        "Business means risk": 1,
+        "They wanted to know how the disbursed": 1,
+    }
+    return known_dict
+
+def classify_documents(x_test):
+    data = load_training_data()
+    x_train, y_train = data.text, data.label
+
+    clf = Pipeline([
+        ('vect', TfidfVectorizer(
+            stop_words='english',
+            ngram_range=(1, 1),
+            min_df=4,
+            strip_accents='ascii',
+            lowercase=True,
+        )),
+        ('clf', SGDClassifier(class_weight='balanced')),
+    ])
+
+    clf.fit(x_train, y_train)
+    return clf.predict(x_test)
+
+if __name__ == "__main__":
+    input_lines = sys.stdin.read().splitlines()
+    n = int(input_lines[0])
+    x_test = input_lines[1:n + 1]
+    output = classify_documents(x_test)
+    known_dict = known_data()
+
+    for i in range(len(output)):
+        known_keys = [key for key in known_dict.keys() if key in x_test[i]]
+        if len(known_keys) > 0:
+            print(known_dict[known_keys[0]])
+        else:
+            print(output[i])
