@@ -1,0 +1,62 @@
+    def read_input():
+    
+    import sys
+    input_lines = sys.stdin.read().strip().split('\n')
+    m, k, d = map(float, input_lines[0].split())
+    k = int(k)
+    d = int(d)
+    
+    stocks = []
+    for i in range(1, k + 1):
+        parts = input_lines[i].split()
+        name = parts[0]
+        owned = int(parts[1])
+        prices = list(map(float, parts[2:]))
+        stocks.append((name, owned, prices))
+    
+    return m, k, d, stocks
+
+def calculate_moving_average(prices):
+
+    return sum(prices) / len(prices)
+
+def decide_transactions(money, stocks):
+
+    transactions = []
+    
+    for stock in stocks:
+        name, owned, prices = stock
+        current_price = prices[-1]
+        moving_average = calculate_moving_average(prices[:-1])
+        
+        if current_price > moving_average and money >= current_price:
+            
+            num_shares_to_buy = int(money // current_price)
+            if num_shares_to_buy > 0:
+                transactions.append((name, 'BUY', num_shares_to_buy))
+                money -= num_shares_to_buy * current_price
+        elif current_price < moving_average and owned > 0:
+           
+            transactions.append((name, 'SELL', owned))
+    
+    return transactions
+
+def print_transactions(m, k, d, names, owned, prices):
+
+    stocks = [(names[i], owned[i], prices[i]) for i in range(k)]
+    
+    transactions = decide_transactions(m, stocks)
+    
+    print(len(transactions))
+    for transaction in transactions:
+        print(transaction[0], transaction[1], transaction[2])
+
+if __name__ == "__main__":
+    m, k, d = 90, 2, 400
+    names = ["iStreet", "HR"]
+    owned = [10, 0]
+    prices = [
+        [4.54, 5.53, 6.56, 5.54, 7.60],
+        [30.54, 27.53, 24.42, 20.11, 17.50]
+    ]  
+    print_transactions(m, k, d, names, owned, prices)
