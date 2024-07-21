@@ -1,0 +1,36 @@
+import json
+import sys
+from sklearn.svm import LinearSVC
+from sklearn.feature_extraction.text import HashingVectorizer
+
+if sys.version_info[0] >= 3:
+    raw_input = input
+
+vectorizer = HashingVectorizer(stop_words='english')
+
+training_texts = []
+training_labels = []
+with open('training.json', 'r', encoding='utf-8') as f:
+    num_train_samples = int(f.readline().strip())
+    for _ in range(num_train_samples):
+        data = json.loads(f.readline().strip())
+        training_texts.append(data['question'] + "\r\n" + data['excerpt'])
+        training_labels.append(data['topic'])
+
+X_train = vectorizer.fit_transform(training_texts)
+
+model = LinearSVC()
+model.fit(X_train, training_labels)
+
+test_texts = []
+num_test_samples = int(raw_input().strip())
+for _ in range(num_test_samples):
+    data = json.loads(raw_input().strip())
+    test_texts.append(data['question'] + "\r\n" + data['excerpt'])
+
+X_test = vectorizer.transform(test_texts)
+
+predicted_labels = model.predict(X_test)
+
+for label in predicted_labels:
+    print(label)
