@@ -1,0 +1,22 @@
+from fractions import Fraction
+
+collection_a = ['w']*5 + ['b']*4
+collection_b = ['w']*7 + ['b']*6
+
+def calculate_combined_probability(a, b):
+  
+    count_a_w = a.count('w')
+    count_a_b = a.count('b')
+    count_b_w = b.count('w')
+    count_b_b = b.count('b')
+
+    total_a = len(a)
+    total_b = len(b)
+    prob_w_from_a_and_b_from_b = Fraction(count_a_w * count_b_b, total_a * (total_b + 1))
+    prob_b_from_a_and_b_from_b = Fraction(count_a_b * (count_b_b + 1), total_a * (total_b + 1))
+
+    combined_probability = prob_w_from_a_and_b_from_b + prob_b_from_a_and_b_from_b
+
+    return combined_probability
+
+print(calculate_combined_probability(collection_a, collection_b))
